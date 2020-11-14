@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(9, auto);
+  background-color: #1aaa5b;
+  padding: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.grid-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+.grid-item:hover {
+    background-color: rgba(255, 100, 100, 0.8);
+}
+.header {
+    margin: 0 auto;
+    background-color: #1aaa5b;
+    max-width: 650px;
+    font-weight: bold;
+}
+.diwali {
+    text-align: center;
+    font-size: 400%;
+    color: rgba(255, 0, 0, 0.8);
+}
+.sheet {
+    margin: 0 auto;
+    max-width: 800px;
+    background-color: #1aaa5b;
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+    <div class="header">
+        <p class="diwali">DIWALI 2020 BINGO!</p>
+    </div>
+</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+/* Randomize array in-place using Durstenfeld shuffle algorithm 
+https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function fillGrid(grid) {
+    var singleA = Math.floor(Math.random() * 9) + 1;
+    var singleB = Math.floor(Math.random() * 9) + 1;
+    while(singleA == singleB) {
+        singleB = Math.floor(Math.random() * 9) + 1;
+    }
+    var singleC = Math.floor(Math.random() * 9) + 1;
+    while(singleC == singleB || singleC == singleA) {
+        singleC = Math.floor(Math.random() * 9) + 1;
+    }
+    var numbers = [];
+    for (var i=1; i<=9; i++) {
+        var max = i*10+1;
+        var min = max - 10;
+        var numi = [];
+        var first = Math.floor(Math.random() * (max - min)) + min;
+        if (i != singleA && i != singleB && i != singleC) {
+            var second = Math.floor(Math.random() * (max - min)) + min;
+            while(second == first) {
+                second = Math.floor(Math.random() * (max - min)) + min;
+            }
+            if (first > second) {
+                var temp = first;
+                first = second;
+                second = temp;
+            }
+            numi.push(first);
+            numi.push(second);
+        } else {
+            numi.push(first);
+        }
+        numbers.push(numi);
+    }
+    for (var i = 0; i < 27; i++) {
+        var item = document.createElement('div');
+        item.className = 'grid-item';
+        grid.append(item);
+    }
+    var items = grid.children;
+    for (var i = 0; i < 9; i++) {
+        items[i].innerHTML = numbers[i][0];
+        if (numbers[i].length > 1) {
+            items[i+9].innerHTML = numbers[i][1];
+        }
+    }
+    var firstLineBlanks = shuffleArray(Array.from(Array(9).keys())).slice(5);
+    for (var i=0; i<firstLineBlanks.length; i++) {
+        items[firstLineBlanks[i]+18].innerHTML = items[firstLineBlanks[i]+9].innerHTML;
+        items[firstLineBlanks[i]+9].innerHTML = items[firstLineBlanks[i]].innerHTML;
+        items[firstLineBlanks[i]].innerHTML = '';
+    }
+    var secondLineBlanks = Array.from(Array(9).keys());
+    var secondLineFulls = 0;
+    for (var i=0; i<9; i++) {
+        if (items[i+9].innerHTML == '') {
+            secondLineBlanks[i] = -1;
+        }
+        if (items[i+18].innerHTML != '') {
+            secondLineBlanks[i] = -1;
+            secondLineFulls++;
+        }
+    }
+    secondLineBlanks = shuffleArray(secondLineBlanks.filter(a => a != -1)).slice(5-secondLineFulls);
+    for (var i=0; i<secondLineBlanks.length; i++) {
+        items[secondLineBlanks[i]+18].innerHTML = items[secondLineBlanks[i]+9].innerHTML;
+        items[secondLineBlanks[i]+9].innerHTML = '';
+    }
+}
+
+function createGrid() {
+    var grid = document.createElement('div');
+    grid.className = 'grid-container';
+    document.getElementsByClassName('sheet')[0].appendChild(grid);
+    fillGrid(grid);
+}
+
+function setGridCount(count) {
+    var grid = document.getElementsByClassName("grid-container");
+    for (var i = grid.length; i < count; i++) {
+        createGrid();
+    }
+    for (var i = grid.length-1; i >= count; i--) {
+        grid[i].remove();
+    }
+}
+
+function calculateGrid() {
+    var items = document.getElementsByClassName('grid-item');
+    var hash = "";
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].innerHTML == '') {
+            hash += "-1a";
+        } else {
+            hash += items[i].innerHTML;
+            hash += "a";
+        }
+    }
+    return hash;
+}
+
+function setGridValues(values) {
+    var items = document.getElementsByClassName('grid-item');
+    for (var i = 0; i < items.length; i++) {
+        if (values[i] == -1) {
+            items[i].innerHTML = '';
+        } else {
+            items[i].innerHTML = values[i];
+        }
+    }
+}
+
+var currentHref = window.location.href;
+var hashIndex = currentHref.indexOf("#");
+if (hashIndex == -1) {
+    setGridCount(6);
+    window.location.href = window.location.href + "#" + calculateGrid();
+} else {
+    var values = currentHref.slice(hashIndex+1).split("a");
+    setGridCount((values.length-1)/27);
+    setGridValues(values);
+}
+</script>
+</body>
+</html>
