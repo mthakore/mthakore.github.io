@@ -19,33 +19,49 @@
   font-weight: bold;
 }
 .grid-item:hover {
-    background-color: rgba(255, 100, 100, 0.8);
+  background-color: rgba(255, 100, 100, 0.8);
 }
-.header {
-    margin: 0 auto;
-    background-color: #1aaa5b;
-    max-width: 650px;
-    font-weight: bold;
+.grid-item-selected:hover {
+    background-color: rgba(200, 200, 200, 0.8);
+}
+.grid-item-selected {
+  background-color: rgba(247, 28, 28, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+.game-banner {
+  margin: 0 auto;
+  background-color: #1aaa5b;
+  max-width: 650px;
+  font-weight: bold;
+  text-align: left;
+  font-size: 150%;
+  color: rgba(10, 10, 10, 0.8);
 }
 .diwali {
-    text-align: center;
-    font-size: 400%;
-    color: rgba(255, 0, 0, 0.8);
+  margin: 0 auto;
+  background-color: #1aaa5b;
+  max-width: 650px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 400%;
+  color: rgba(255, 0, 0, 0.8);
 }
 .sheet {
-    margin: 0 auto;
-    max-width: 800px;
-    background-color: #1aaa5b;
+  margin: 0 auto;
+  max-width: 800px;
+  background-color: #1aaa5b;
 }
 </style>
 </head>
 <body>
 <div class="sheet">
-    <div class="header">
-        <p class="diwali">DIWALI 2020 BINGO!</p>
-    </div>
+    <div class="diwali">DIWALI 2020 BINGO!</div>
 </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
 /* Randomize array in-place using Durstenfeld shuffle algorithm 
 https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array */
@@ -133,13 +149,19 @@ function createGrid() {
     fillGrid(grid);
 }
 
-function setGridCount(count) {
+function setGridCount(games, tickets) {
     var grid = document.getElementsByClassName("grid-container");
-    for (var i = grid.length; i < count; i++) {
-        createGrid();
-    }
-    for (var i = grid.length-1; i >= count; i--) {
+    for (var i = grid.length-1; i >= 0; i--) {
         grid[i].remove();
+    }
+    var ticketsPerGame = Math.floor(tickets/games);
+    for (var i = 1; i<= games; i++) {
+        var gameBanner = document.createElement('div');
+        gameBanner.innerHTML = "Game " + i;
+        gameBanner.className = "game-banner";
+        document.getElementsByClassName('sheet')[0].appendChild(gameBanner);
+        for (var j = 0; j < ticketsPerGame; j++)
+            createGrid();
     }
 }
 
@@ -148,10 +170,12 @@ function calculateGrid() {
     var hash = "";
     for (var i = 0; i < items.length; i++) {
         if (items[i].innerHTML == '') {
-            hash += "-1a";
+            hash += "00";
         } else {
+            if (items[i].innerHTML < 10) {
+                hash += "0";
+            }
             hash += items[i].innerHTML;
-            hash += "a";
         }
     }
     return hash;
@@ -160,7 +184,7 @@ function calculateGrid() {
 function setGridValues(values) {
     var items = document.getElementsByClassName('grid-item');
     for (var i = 0; i < items.length; i++) {
-        if (values[i] == -1) {
+        if (values[i] == 0) {
             items[i].innerHTML = '';
         } else {
             items[i].innerHTML = values[i];
@@ -171,13 +195,28 @@ function setGridValues(values) {
 var currentHref = window.location.href;
 var hashIndex = currentHref.indexOf("#");
 if (hashIndex == -1) {
-    setGridCount(6);
+    setGridCount(3, 6);
     window.location.href = window.location.href + "#" + calculateGrid();
 } else {
-    var values = currentHref.slice(hashIndex+1).split("a");
-    setGridCount((values.length-1)/27);
+    var values = currentHref.slice(hashIndex+1).match(/.{2}/g);
+    var tickets = (values.length)/27;
+    setGridCount(tickets/2, tickets);
     setGridValues(values);
 }
+
+function callback(e) {
+    var e = window.e || e;
+
+    if (e.target.className == 'grid-item' && e.target.innerHTML != '')
+        e.target.className = 'grid-item-selected';
+    else if (e.target.className == 'grid-item-selected' && e.target.innerHTML != '')
+        e.target.className = 'grid-item';
+}
+
+if (document.addEventListener)
+    document.addEventListener('click', callback, false);
+else
+    document.attachEvent('onclick', callback);
 </script>
 </body>
 </html>
