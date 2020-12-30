@@ -18,10 +18,10 @@
   text-align: center;
   font-weight: bold;
 }
-.grid-item:hover {
+.grid-item-selected:hover {
   background-color: rgba(255, 100, 100, 0.8);
 }
-.grid-item-selected:hover {
+.grid-item:hover {
     background-color: rgba(200, 200, 200, 0.8);
 }
 .grid-item-selected {
@@ -59,7 +59,7 @@
 </head>
 <body>
 <div class="sheet">
-    <div class="diwali">DIWALI 2020 BINGO!</div>
+    <div class="diwali">HAPPY NEW YEAR 2021 HOUSIE!</div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
@@ -195,7 +195,7 @@ function setGridValues(values) {
 var currentHref = window.location.href;
 var hashIndex = currentHref.indexOf("#");
 if (hashIndex == -1) {
-    setGridCount(3, 6);
+    setGridCount(2, 4);
     window.location.href = window.location.href + "#" + calculateGrid();
 } else {
     var values = currentHref.slice(hashIndex+1).match(/.{2}/g);
