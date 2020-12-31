@@ -170,25 +170,54 @@ function calculateGrid() {
     var hash = "";
     for (var i = 0; i < items.length; i++) {
         if (items[i].innerHTML == '') {
-            hash += "00";
+            hash += "s";
         } else {
-            if (items[i].innerHTML < 10) {
-                hash += "0";
-            }
-            hash += items[i].innerHTML;
+            hash += items[i].innerHTML % 10;
         }
     }
-    return hash;
+    return compress(hash);
+}
+
+// 14818ssss3s9ss2s55s9sss420698s43sss3s045ss22s0s6s97s3ss714s7s6s39ss3s30sss788s8s1552s1s4sss6s8s1s257ss958ss7
+// 1s5s8s6s066s6s78f000s9s7gs322516s22s9s0s839s6f02s64f15s1s8134f6d26s404d74d55s2s8s469f1s667s7
+// 236f4s23d01A4f9d2505614d3s5d7d5s506d519s9s8d7s46s6322s5s8d03799d8d0d70d13s32d227d98d97s6
+// fC5117E145d5d4C864f44G1d41f593II077fF121G3d2d68d5672f188d26178f3G5J1dE0f760
+// I3iGcF22I90b9EB50E9_8_D733a0I99T4F41Fb6F67358G0_H3BFcc385j50aI6
+function compress(compressed) {
+    compressed = compressed.replace(/ssss/g, 'g').replace(/sss/g, '_').replace(/ss/g, '-');
+    for (var i = 0; i < 10; i++)
+        compressed = compressed.replace(new RegExp(i + 's', 'g'), String.fromCharCode(65 + i));
+    for (var i = 0; i < 10; i++)
+        compressed = compressed.replace(new RegExp(i + 'g', 'g'), String.fromCharCode(75 + i));
+    for (var i = 0; i < 10; i++)
+        compressed = compressed.replace(new RegExp(i + '-', 'g'), String.fromCharCode(97 + i));
+    return compressed;
+}
+
+function decompress(decompressed) {
+    for (var i = 0; i < 10; i++)
+        decompressed = decompressed.replace(new RegExp(String.fromCharCode(97 + i), 'g'), i + '-');
+    for (var i = 0; i < 10; i++)
+        decompressed = decompressed.replace(new RegExp(String.fromCharCode(75 + i), 'g'), i + 'g');
+    for (var i = 0; i < 10; i++)
+        decompressed = decompressed.replace(new RegExp(String.fromCharCode(65 + i), 'g'), i + 's');
+    decompressed = decompressed.replace(/-/g, 'ss').replace(/_/g, 'sss').replace(/g/g, 'ssss');
+    return decompressed;
 }
 
 function setGridValues(values) {
     var items = document.getElementsByClassName('grid-item');
+    var col = 0;
     for (var i = 0; i < items.length; i++) {
-        if (values[i] == 0) {
+        if (values[i] == 's') {
             items[i].innerHTML = '';
         } else {
-            items[i].innerHTML = values[i];
+            var intVal = parseInt(values[i]);
+            if (intVal == 0) intVal = 10;
+            items[i].innerHTML = col + intVal;
         }
+        col += 10;
+        col %= 90;
     }
 }
 
@@ -198,7 +227,7 @@ if (hashIndex == -1) {
     setGridCount(2, 4);
     window.location.href = window.location.href + "#" + calculateGrid();
 } else {
-    var values = currentHref.slice(hashIndex+1).match(/.{2}/g);
+    var values = decompress(currentHref.slice(hashIndex+1)).match(/.{1}/g);
     var tickets = (values.length)/27;
     setGridCount(tickets/2, tickets);
     setGridValues(values);
